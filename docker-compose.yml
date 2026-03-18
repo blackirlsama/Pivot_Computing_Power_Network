@@ -1,0 +1,131 @@
+services:
+  # Nginx 反向代理
+  nginx:
+    image: nginx:alpine
+    container_name: pivot_nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8082:80"
+    networks:
+      - pivot_network
+    depends_on:
+      - backend
+      - system-vue
+    restart: unless-stopped
+
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: pivot_mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root123456
+      - MYSQL_DATABASE=system_template
+    networks:
+      - pivot_network
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis 服务
+  redis:
+    image: redis:7-alpine
+    container_name: pivot_redis
+    networks:
+      - pivot_network
+    restart: unless-stopped
+
+  # 后端服务 - Spring Boot (Java 11)
+  backend:
+    image: maven:3.8-openjdk-11
+    container_name: pivot_backend
+    working_dir: /app
+    volumes:
+      - ./system-template/system-springboot:/app
+      - maven-cache:/root/.m2
+    ports:
+      - "8090:8090"
+    networks:
+      - pivot_network
+    command: mvn spring-boot:run
+    environment:
+      - SPRING_REDIS_HOST=redis
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/system_template?useSSL=false&serverTimezone=Asia/Shanghai
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root123456
+    depends_on:
+      - redis
+      - mysql
+    restart: unless-stopped
+
+  # 主前端 - system-vue (Vue2)
+  system-vue:
+    image: node:14-alpine
+    container_name: pivot_system_vue
+    working_dir: /app
+    volumes:
+      - ./system-template/system-vue:/app
+      - node_modules_system_vue:/app/node_modules
+    networks:
+      - pivot_network
+    command: sh -c "npm install --legacy-peer-deps && npm run serve"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # 智能流量预测 - easyts-web-main (Vue2)
+  easyts:
+    image: node:14-alpine
+    container_name: pivot_easyts
+    working_dir: /app
+    volumes:
+      - ./easyts-web-main:/app
+      - node_modules_easyts:/app/node_modules
+    ports:
+      - "9528:9528"
+    networks:
+      - pivot_network
+    command: sh -c "npm install --legacy-peer-deps && npm run dev"
+    restart: unless-stopped
+
+  # 资源编排与调度 - ithings-new-main (React 18)
+  ithings:
+    image: node:18-alpine
+    container_name: pivot_ithings
+    working_dir: /app
+    volumes:
+      - ./ithings-new-main:/app
+      - node_modules_ithings:/app/node_modules
+    ports:
+      - "8000:8000"
+    networks:
+      - pivot_network
+    command: sh -c "npm install --legacy-peer-deps && npm run start:dev"
+    restart: unless-stopped
+
+  # 泛在协同计算 - ymir (React 17)
+  ymir:
+    image: node:16-alpine
+    container_name: pivot_ymir
+    working_dir: /app
+    volumes:
+      - ./ymir:/app
+      - node_modules_ymir:/app/node_modules
+    ports:
+      - "8001:8001"
+    networks:
+      - pivot_network
+    command: sh -c "npm config set registry https://registry.npmjs.org/ && npm config set fetch-timeout 600000 && npm config set fetch-retry-mintimeout 60000 && npm config set fetch-retry-maxtimeout 300000 && rm -f package-lock.json && npm install --legacy-peer-deps --no-audit && PORT=8001 npm run start"
+    environment:
+      - PORT=8001
+    restart: "no"
+
+networks:
+  pivot_network:
+    driver: bridge
+
+volumes:
+  maven-cache:
+  node_modules_system_vue:
+  node_modules_easyts:
+  node_modules_ithings:
+  node_modules_ymir:

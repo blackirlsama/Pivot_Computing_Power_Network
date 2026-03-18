@@ -44,7 +44,7 @@ export default {
         {
           name: "FederatedLearning",
           title: "泛在协同计算",
-          url: "http://82.157.104.186:3000/home/portal",
+          url: "http://81.70.52.75:8001",
           icon: "el-icon-share",
         },
         {
@@ -56,7 +56,7 @@ export default {
         {
           name: "ComputingTrade",
           title: "资源编排与调度",
-          url: "http://82.157.104.186:8080/#/", // iThings 物联网平台
+          url: "http://81.70.52.75:8000",
           icon: "el-icon-monitor",
         },
         {
@@ -68,7 +68,7 @@ export default {
         {
           name: "TrafficPrediction",
           title: "智能流量预测",
-          url: "http://82.157.104.186:9528/",
+          url: "https://81.70.52.75:9528",
           icon: "el-icon-data-line",
         },
       ],

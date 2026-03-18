@@ -1,22 +1,18 @@
-FROM node:18-alpine as builder
+FROM node:16-alpine
+
 WORKDIR /app
 
-ARG NPM_REGISTRY=https://registry.npmjs.org
-ARG ENV=prod
+COPY package.json ./
 
-COPY package.json .
-COPY package-lock.json .
-RUN npm install --registry ${NPM_REGISTRY}
+RUN npm config set registry https://registry.npmjs.org/ && \
+    npm config set fetch-timeout 600000 && \
+    npm config set fetch-retry-mintimeout 60000 && \
+    npm config set fetch-retry-maxtimeout 300000 && \
+    npm install --legacy-peer-deps --no-audit && \
+    npm install parseqs yeast has-cors backo2 --legacy-peer-deps --no-audit
+
 COPY . .
-RUN npm run build:${ENV}
 
-FROM nginx:alpine
-COPY --from=builder /app/ymir /usr/share/nginx/html
-RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf.template /etc/nginx/conf.d
-COPY docs /data/ymir/docs
+EXPOSE 8001
 
-COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["npx", "umi", "dev"]

@@ -28,7 +28,8 @@ function resolve(dir) {
 module.exports = {
   devServer: {
     host: "0.0.0.0",  // 允许外部访问
-    port: 8080,
+    port: 8082,
+    disableHostCheck: true,  // 禁用 Host 检查
     proxy: proxyObjct,
   },
   // 配置使用svg图标

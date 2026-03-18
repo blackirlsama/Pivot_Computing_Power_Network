@@ -30,7 +30,7 @@ export default {
         {
           name: "FederatedLearning",
           title: "泛在协同计算",
-          url: "http://82.157.104.186:3000/home/portal",
+          url: "http://localhost:8001",
           icon: "el-icon-share",
         },
         {
@@ -42,7 +42,7 @@ export default {
         {
           name: "ComputingTrade",
           title: "资源编排与调度",
-          url: "http://82.157.104.186:8080/#/",
+          url: "http://localhost:8000",
           icon: "el-icon-monitor",
         },
         {

@@ -11,7 +11,12 @@ const whiteList = [
   "/404",
   "/401",
   "/dashboard",
-  "/profile"
+  "/profile",
+  "/modules/ppio",
+  "/modules/federated-learning",
+  "/modules/computing-trade",
+  "/modules/webase",
+  "/modules/traffic-prediction"
 ];
 
 // ======================= 路由导航守卫 =======================
